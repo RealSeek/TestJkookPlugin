@@ -64,8 +64,8 @@ public class TestManager {
         registerModule(new me.realseek.test.modules.integration.FriendSystemIntegrationTestModule());
         registerModule(new me.realseek.test.modules.integration.FileUploadIntegrationTestModule());
 
-        // ThreadChannel 需要 JKook 0.55.0+，暂时禁用
-        // registerModule(new me.realseek.test.modules.integration.ThreadChannelIntegrationTestModule());
+        // ThreadChannel 集成测试（已启用）
+        registerModule(new me.realseek.test.modules.integration.ThreadChannelIntegrationTestModule());
 
         long unitTestCount = modules.stream()
                 .filter(m -> !(m instanceof me.realseek.test.modules.integration.IntegrationTestModule))

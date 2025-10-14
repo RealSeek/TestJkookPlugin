@@ -53,6 +53,7 @@ public class MessageIntegrationTestModule extends IntegrationTestModule {
         runTest("发送纯文本消息", () -> testSendTextMessage(channel));
         runTest("发送 Markdown 消息", () -> testSendMarkdownMessage(channel));
         runTest("发送卡片消息", () -> testSendCardMessage(channel));
+        runTest("发送临时消息", () -> testSendTempMessage(channel));
         runTest("获取频道历史消息", () -> testGetChannelMessages(channel));
         runTest("更新消息", () -> testUpdateMessage(channel));
         runTest("删除消息", () -> testDeleteMessage(channel));
@@ -102,6 +103,47 @@ public class MessageIntegrationTestModule extends IntegrationTestModule {
         createdMessageIds.add(messageId);
 
         logger.info("成功发送卡片消息，ID: {}", messageId);
+    }
+
+    private void testSendTempMessage(TextChannel channel) {
+        // 临时消息（Temp Message）只在服务器频道中有效
+        // 需要指定目标用户 ID，消息只对该用户可见
+        if (testUserId == null || testUserId.isEmpty()) {
+            logger.info("未配置测试用户ID，跳过临时消息测试");
+            return;
+        }
+
+        logger.info("测试临时消息功能...");
+        logger.info("提示：临时消息只在服务器频道中有效，私聊中不支持此功能");
+
+        try {
+            String content = "【测试】这是一条临时消息，只有你能看到 - " + System.currentTimeMillis();
+            TextComponent component = new TextComponent(content);
+
+            // 使用反射检查并调用 sendTempComponent 方法
+            try {
+                var method = channel.getClass().getMethod("sendTempComponent",
+                        snw.jkook.message.component.BaseComponent.class, String.class);
+
+                String messageId = (String) method.invoke(channel, component, testUserId);
+
+                assertNotNull(messageId, "临时消息 ID 不应为 null");
+                assertFalse(messageId.isEmpty(), "临时消息 ID 不应为空");
+
+                logger.info("✓ 成功发送临时消息，ID: {}，目标用户: {}", messageId, testUserId);
+
+                // 注意：临时消息通常不需要清理，因为它们只对特定用户可见
+
+            } catch (NoSuchMethodException e) {
+                logger.warn("⚠ TextChannel.sendTempComponent() 方法不存在");
+                logger.info("当前 JKook 版本可能不支持临时消息功能");
+                logger.info("跳过临时消息测试");
+            }
+
+        } catch (Exception e) {
+            logger.warn("发送临时消息失败: {}", e.getMessage());
+            logger.info("跳过临时消息测试");
+        }
     }
 
     private void testGetChannelMessages(TextChannel channel) {

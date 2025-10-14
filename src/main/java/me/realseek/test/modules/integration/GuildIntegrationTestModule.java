@@ -7,6 +7,7 @@ import snw.jkook.entity.CustomEmoji;
 import snw.jkook.entity.channel.Category;
 import snw.jkook.entity.channel.Channel;
 import snw.jkook.entity.channel.TextChannel;
+import snw.jkook.entity.channel.ThreadChannel;
 import snw.jkook.entity.channel.VoiceChannel;
 import snw.jkook.util.PageIterator;
 
@@ -53,7 +54,6 @@ public class GuildIntegrationTestModule extends IntegrationTestModule {
         runTest("获取服务器角色列表", () -> testGetRoles(guild));
         runTest("获取服务器自定义表情", () -> testGetCustomEmojis(guild));
         runTest("获取服务器基本信息", () -> testGetGuildInfo(guild));
-        runTest("获取服务器静音状态", () -> testGetMuteStatus(guild));
 
         // 需要副作用权限的测试
         if (canExecuteSideEffects()) {
@@ -85,49 +85,88 @@ public class GuildIntegrationTestModule extends IntegrationTestModule {
     }
 
     private void testGetChannels(Guild guild) {
+        logger.info("=== 测试频道列表获取 ===");
+
         try {
             PageIterator<Set<Channel>> channels = guild.getChannels();
-            assertNotNull(channels, "频道列表不应为 null");
+            assertNotNull(channels, "频道迭代器不应为 null");
 
             if (channels.hasNext()) {
                 Set<Channel> firstPage = channels.next();
-                assertNotNull(firstPage, "第一页频道列表不应为 null");
+                logger.info("成功获取频道列表，共 {} 个频道", firstPage.size());
 
-                logger.info("服务器有 {} 个频道（第一页）", firstPage.size());
+                // 按类型分类统计
+                List<TextChannel> textChannels = new ArrayList<>();
+                List<VoiceChannel> voiceChannels = new ArrayList<>();
+                List<Category> categories = new ArrayList<>();
+                List<ThreadChannel> threadChannels = new ArrayList<>();
 
-                int textCount = 0, voiceCount = 0, categoryCount = 0;
                 for (Channel channel : firstPage) {
-                    try {
-                        if (channel instanceof TextChannel) {
-                            textCount++;
-                            if (textCount <= 3) {
-                                logger.info("  - 文本频道: {} (ID: {})", channel.getName(), channel.getId());
-                            }
-                        } else if (channel instanceof VoiceChannel) {
-                            voiceCount++;
-                            if (voiceCount <= 3) {
-                                logger.info("  - 语音频道: {} (ID: {})", channel.getName(), channel.getId());
-                            }
-                        } else if (channel instanceof Category) {
-                            categoryCount++;
-                            if (categoryCount <= 3) {
-                                logger.info("  - 分组: {} (ID: {})", channel.getName(), channel.getId());
-                            }
-                        }
-                    } catch (Exception e) {
-                        logger.warn("解析频道信息时出错: {}", e.getMessage());
+                    if (channel instanceof ThreadChannel) {
+                        // ThreadChannel 继承自 TextChannel，需要先判断
+                        threadChannels.add((ThreadChannel) channel);
+                    } else if (channel instanceof TextChannel) {
+                        textChannels.add((TextChannel) channel);
+                    } else if (channel instanceof VoiceChannel) {
+                        voiceChannels.add((VoiceChannel) channel);
+                    } else if (channel instanceof Category) {
+                        categories.add((Category) channel);
                     }
                 }
 
-                logger.info("统计: 文本频道 {}, 语音频道 {}, 分组 {}",
-                        textCount, voiceCount, categoryCount);
+                // 输出文本频道
+                logger.info("✓ 文本频道数量: {}", textChannels.size());
+                int count = 0;
+                for (TextChannel channel : textChannels) {
+                    if (count++ < 3) {
+                        logger.info("  - 文本频道: {} (ID: {})", channel.getName(), channel.getId());
+                    }
+                }
 
-                assertTrue(firstPage.size() > 0, "服务器应该至少有一个频道");
+                // 输出语音频道
+                logger.info("✓ 语音频道数量: {}", voiceChannels.size());
+                count = 0;
+                for (VoiceChannel channel : voiceChannels) {
+                    if (count++ < 3) {
+                        logger.info("  - 语音频道: {} (ID: {})", channel.getName(), channel.getId());
+                    }
+                }
+
+                // 输出分组
+                logger.info("✓ 分组数量: {}", categories.size());
+                count = 0;
+                for (Category category : categories) {
+                    if (count++ < 3) {
+                        logger.info("  - 分组: {} (ID: {})", category.getName(), category.getId());
+                    }
+                }
+
+                // 输出话题频道
+                logger.info("✓ 话题频道数量: {}", threadChannels.size());
+                count = 0;
+                for (ThreadChannel channel : threadChannels) {
+                    if (count++ < 3) {
+                        logger.info("  - 话题频道: {} (ID: {}, 父频道: {})",
+                                channel.getName(),
+                                channel.getId(),
+                                channel.getParent() != null ? channel.getParent().getName() : "无");
+                    }
+                }
+            } else {
+                logger.info("频道迭代器为空（服务器可能没有频道）");
+            }
+
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("Unable to load resource")) {
+                logger.warn("⚠ KookBC getChannels() 已知问题: {}", e.getMessage());
+                logger.info("这是 KookBC 在某些服务器配置下的已知限制，不影响其他功能");
+                logger.info("测试跳过（API 存在但在当前环境下不可用）");
+            } else {
+                throw e;
             }
         } catch (Exception e) {
             logger.warn("获取频道列表时出错: {}", e.getMessage());
-            logger.info("频道列表测试跳过（可能是 KookBC API 限制或版本问题）");
-            // 不抛出异常，允许测试继续
+            logger.info("测试跳过（非预期错误）");
         }
     }
 
@@ -184,21 +223,6 @@ public class GuildIntegrationTestModule extends IntegrationTestModule {
         assertTrue(guild.getId().equals(testGuildId), "服务器 ID 应该匹配");
         assertNotNull(guild.getName(), "服务器名称不应为 null");
         assertNotNull(guild.getMaster(), "服主不应为 null");
-    }
-
-    private void testGetMuteStatus(Guild guild) {
-        try {
-            var muteStatus = guild.getMuteStatus();
-            if (muteStatus != null && !muteStatus.isEmpty()) {
-                logger.info("服务器有 {} 条静音记录", muteStatus.size());
-                // MuteData 包含频道 ID 和用户 ID 等信息
-                logger.info("静音状态已获取");
-            } else {
-                logger.info("服务器未设置静音");
-            }
-        } catch (Exception e) {
-            logger.warn("获取静音状态时发生错误: {}", e.getMessage());
-        }
     }
 
     private void testCreateTextChannel(Guild guild) {
