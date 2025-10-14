@@ -1,0 +1,148 @@
+# KookBC 功能测试插件配置文件
+
+# 自动测试配置
+auto-test:
+  # 是否在插件启动时自动执行测试（建议手动运行测试）
+  enabled: false
+  # 延迟执行时间（毫秒）
+  delay: 5000
+
+# 真实环境测试配置
+integration-test:
+  # 是否启用集成测试（需要真实 Kook 环境）
+  enabled: true
+  # 测试服务器 ID（必须配置）
+  test-guild-id: "3480026671923392"
+  # 测试文本频道 ID（必须配置）
+  test-text-channel-id: "6500359042327269"
+  # 测试语音频道 ID（可选）
+  test-voice-channel-id: "3817628826111711"
+  # 测试帖子频道 ID（可选，用于 ThreadChannel 测试，需要 JKook 0.55.0+）
+  test-thread-channel-id: "9862861895972066"
+  # 测试用户 ID（可选，用于用户相关测试）
+  test-user-id: "2038278961"
+  # 是否执行可能有副作用的测试（如创建/删除频道、发送消息等）
+  allow-side-effects: true
+  # 测试完成后是否自动清理（删除测试创建的频道、角色等）
+  auto-cleanup: true
+
+# 测试报告配置
+report:
+  # 是否生成 HTML 报告
+  html: true
+  # 是否生成文本报告
+  text: true
+  # 报告保存目录（相对于插件数据目录）
+  directory: reports
+
+# 测试模块配置
+modules:
+  # ========== 基础单元测试模块 ==========
+
+  # 事件系统测试
+  event-system:
+    enabled: true
+    auto-run: false
+
+  # 命令系统测试
+  command-system:
+    enabled: true
+    auto-run: false
+
+  # API 功能测试
+  api:
+    enabled: true
+    auto-run: false
+
+  # 消息构建器测试
+  message-builder:
+    enabled: true
+    auto-run: false
+
+  # 调度器测试
+  scheduler:
+    enabled: true
+    auto-run: false
+
+  # 配置系统测试
+  configuration:
+    enabled: true
+    auto-run: false
+
+  # ========== 第一轮补充的单元测试模块 ==========
+
+  # 权限系统测试
+  permission-system:
+    enabled: true
+    auto-run: false
+
+  # 文件组件测试（CardMessage & FileComponent）
+  file-component:
+    enabled: true
+    auto-run: false
+
+  # 实体扩展测试（Guild & Channel）
+  entity-extension:
+    enabled: true
+    auto-run: false
+
+  # ========== 第二轮补充的单元测试模块 ==========
+
+  # 用户详细信息测试（User 接口全覆盖）
+  user-detail:
+    enabled: true
+    auto-run: false
+
+  # 角色管理测试（Role 接口）
+  role-management:
+    enabled: true
+    auto-run: false
+
+  # 模板消息测试（TemplateMessage）
+  template-message:
+    enabled: true
+    auto-run: false
+
+  # 角色事件测试（RoleEvent 监听）
+  role-event:
+    enabled: true
+    auto-run: false
+
+  # ========== 集成测试模块 ==========
+
+  # 频道操作集成测试
+  channel-operations-integration:
+    enabled: true
+    auto-run: false
+
+  # 消息操作集成测试
+  message-operations-integration:
+    enabled: true
+    auto-run: false
+
+  # 私聊消息集成测试
+  private-message-integration:
+    enabled: true
+    auto-run: false
+
+  # 好友系统集成测试
+  friend-system-integration:
+    enabled: true
+    auto-run: false
+
+  # 文件上传集成测试
+  file-upload-integration:
+    enabled: true
+    auto-run: false
+
+  # 角色操作集成测试
+  role-operations-integration:
+    enabled: true
+    auto-run: false
+
+# 日志配置
+logging:
+  # 日志级别: DEBUG, INFO, WARN, ERROR
+  level: INFO
+  # 是否显示详细的测试执行信息
+  verbose: true

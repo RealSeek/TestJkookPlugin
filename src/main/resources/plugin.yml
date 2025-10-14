@@ -1,0 +1,8 @@
+name: TestJkookPlugin
+version: 1.0.0
+api-version: 0.54
+main: me.realseek.TestJkookPlugin
+description: KookBC 功能测试插件，用于全面测试 JKook/KookBC 的所有核心功能
+authors:
+  - RealSeek
+website: https://github.com/SNWCreations/KookBC

@@ -1,0 +1,48 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+group = 'me.realseek'
+version = '1.0.0'
+archivesBaseName = 'TestJkookPlugin'
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://repo.panda-lang.org/releases' }
+}
+
+dependencies {
+    compileOnly 'com.github.SNWCreations:KookBC:0.32.2'
+    compileOnly 'io.github.snwcreations:jkook:0.54.2'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    dependencies {
+        exclude(dependency('org.slf4j:slf4j-api'))
+    }
+}
+
+task copyJar(type: Copy) {
+    from shadowJar.archiveFile
+    into "E:/devKookBC/plugins"
+}
+
+build {
+    dependsOn shadowJar
+    finalizedBy copyJar
+}
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
