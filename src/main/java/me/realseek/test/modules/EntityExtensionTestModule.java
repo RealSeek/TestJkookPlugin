@@ -2,6 +2,7 @@ package me.realseek.test.modules;
 
 import me.realseek.test.BaseTestModule;
 import snw.jkook.Unsafe;
+import snw.jkook.entity.CustomEmoji;
 
 /**
  * 实体扩展测试模块
@@ -167,7 +168,7 @@ public class EntityExtensionTestModule extends BaseTestModule {
 
             // 验证关键方法存在
             assertNotNull(holderClass.getMethod("getInvitations"), "getInvitations 方法应该存在");
-            assertNotNull(holderClass.getMethod("createInvite", int.class, Integer.class),
+            assertNotNull(holderClass.getMethod("createInvite", int.class, int.class),
                     "createInvite 方法应该存在");
 
             logger.info("InviteHolder 接口验证通过");
@@ -182,8 +183,8 @@ public class EntityExtensionTestModule extends BaseTestModule {
             assertNotNull(holderClass, "ReactionHolder 接口应该存在");
 
             // 验证关键方法存在
-            assertNotNull(holderClass.getMethod("addReaction", String.class),
-                    "addReaction 方法应该存在");
+            assertNotNull(holderClass.getMethod("sendReaction", CustomEmoji.class),
+                    "sendReaction 方法应该存在");
 
             logger.info("ReactionHolder 接口验证通过");
         } catch (Exception e) {
