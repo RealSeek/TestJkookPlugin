@@ -122,10 +122,10 @@ public class MessageIntegrationTestModule extends IntegrationTestModule {
 
             // 使用反射检查并调用 sendTempComponent 方法
             try {
-                var method = channel.getClass().getMethod("sendTempComponent",
+                var method = channel.getClass().getMethod("sendComponent",
                         snw.jkook.message.component.BaseComponent.class, String.class);
 
-                String messageId = (String) method.invoke(channel, component, testUserId);
+                String messageId = (String) method.invoke(component, null, testUserId);
 
                 assertNotNull(messageId, "临时消息 ID 不应为 null");
                 assertFalse(messageId.isEmpty(), "临时消息 ID 不应为空");
